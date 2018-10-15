@@ -1,13 +1,34 @@
 runtime: nodejs
 env: flex
 
+resources:
+  cpu: 1
+  memory_gb: 2.3
+  disk_size_gb: 10
+
 env_variables:
-  # --REQUIRED--
-  DATABASE_URI: mongodb://localhost:27017/dev
-  APP_ID: <your-app-id>
-  MASTER_KEY: <your-master-key>
-  SERVER_URL: https://your-project-id.appspot.com/parse
+  DATABASE_URI: mongodb://apere_cart1:nhw2t8jePEqgbrWb@cluster0-shard-00-00-550s3.gcp.mongodb.net:27017,cluster0-shard-00-01-550s3.gcp.mongodb.net:27017,cluster0-shard-00-02-550s3.gcp.mongodb.net:27017/apere_11?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin
+  APP_ID: apere
+  MASTER_KEY: asdfkeuw589u4ioauiofaiosdjfaiosjoioio
+  SERVER_URL: https://api.apere.ng/api
+  APP_NAME: Apere
+  NODE_ENV: production
+  BASE_URL: https://api.apere.ng
+  PARSE_MOUNT: /api
+  CHECKOUT_BASE_URL: https://checkout.apere.ng
+  MAILGUN_API_KEY: key-e3022ef38d0de51ddddfd63efe5289f4
+  TOOKAN_API_KEY: 55606786f244091347106d664410214514e4c0f329d572385b1c
+  TOOKAN_TEAM_ID: 70153
+  TOOKAN_USER_D: 73732
+  INNSTAPAY_BASE_URL: https://api.innstapay.com/merchant/v1
+  TOOKAN_WEBHOOK_SECRET: tgMLxpAZivemHFaL7ldfjk453ksd5wrsdlkfkjKLJFLK
+  GOOGLE_MAPS_API_KEY: AIzaSyChqe4bfuBo4P5zYDu8AqS4HtKaKJBWnmY
+  APERE_INNSTAPAY_PUBLIC_KEY: pk_8a624b1c-d553-44f4-a5be-47219e45257e
+  APERE_INNSTAPAY_PRIVATE_KEY: sk_54b025d6pf7c1-4225-822f-67e8b4d75076
+  APERE_APERE_PRIVATE_KEY: afju5897asdjfklasjdfa
+  REDIS_HOST: 35.188.185.7
+  REDIS_AUTH: tte26cuc65WU
   # --OPTIONAL--
   # FILE_KEY: <your-file-key>
   # PARSE_MOUNT: /parse
-  # CLOUD_CODE_MAIN:  
+  # CLOUD_CODE_MAIN:
