@@ -177,7 +177,7 @@ route.post('/innstapay/startShipping', async function (req, res) {
                     message: 'Shipping Processed'
                 })
             } else {
-                // shipping charges does not correspond with metrics. Possible fraud or shipping prices was changed before order completion
+                // shipping charges does not correspond with metrics. Possible fraud attempt or shipping prices was changed before order completion
                 res.status(401).send('Shipping Charges error');
             }
         } catch(e){

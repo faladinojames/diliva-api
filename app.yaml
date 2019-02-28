@@ -1,9 +1,10 @@
 runtime: nodejs
 env: flex
+instance_class: F2
 
 resources:
   cpu: 1
-  memory_gb: 2.3
+  memory_gb: 0.5
   disk_size_gb: 10
 
 env_variables:
@@ -26,7 +27,7 @@ env_variables:
   APERE_INNSTAPAY_PUBLIC_KEY: pk_8a624b1c-d553-44f4-a5be-47219e45257e
   APERE_INNSTAPAY_PRIVATE_KEY: sk_54b025d6pf7c1-4225-822f-67e8b4d75076
   APERE_APERE_PRIVATE_KEY: afju5897asdjfklasjdfa
-  REDIS_HOST: 35.188.185.7
+  REDIS_HOST: 35.222.102.40
   REDIS_AUTH: tte26cuc65WU
   # --OPTIONAL--
   # FILE_KEY: <your-file-key>

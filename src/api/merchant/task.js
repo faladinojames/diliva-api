@@ -140,7 +140,8 @@ route.post('/', async function (req, res) {
     const merchant = req.merchant;
     const customer = data.customer;
     const {deliveryAddress, pickupAddress} = data;
-
+    console.log('create task');
+    console.log(data);
 
     try{
 
@@ -158,7 +159,6 @@ route.post('/', async function (req, res) {
         if (!pickupAddress.geocode){
             pickupAddress.geocode = await Location.getGeocodeFromAddress(pickupAddress.description, pickupAddress.state, pickupAddress.lga);
         }
-
 
 
         const task = new Task();
@@ -206,8 +206,9 @@ route.post('/', async function (req, res) {
         if (wallet.get('available_balance') > metrics.charge){
             // wallet can be charged with amount
 
-            const job = queue.create('update_business_balance', {
+            const job = queue.create('process_business_wallet_transaction', {
                 amount: - Math.abs(metrics.charge) ,
+                type: 'update_business_balance',
                 id: wallet.id
             }).save();
 
@@ -229,7 +230,7 @@ route.post('/', async function (req, res) {
                 const token = creditCard.get('token');
                 //charge with token
 
-                const r = await axios.post(`${process.env.INNSTAPAY_BASE_URL}/card/charge`,{token, amount: metrics.charge, email: creditCard.get('email')}, {
+                const r = await axios.post(`${process.env.INNSTAPAY_BASE_URL}/card/charge/${token}`,{amount: metrics.charge, email: creditCard.get('email')}, {
                     headers: {
                         Authorization: `Bearer ${process.env.APERE_INNSTAPAY_PRIVATE_KEY}`
                     }

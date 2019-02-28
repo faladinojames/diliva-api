@@ -8,7 +8,7 @@ const customerSchema = Joi.object().keys({
 
 const addressSchema = Joi.object().keys({
     description: Joi.string(),
-    state: Joi.string().required(),
+    state: Joi.string(),
     city: Joi.string(),
     lga: Joi.string(),
     geocode: Joi.object(),
@@ -17,6 +17,8 @@ const addressSchema = Joi.object().keys({
 const createTaskSchema = Joi.object().keys({
     customer: customerSchema.required(),
     deliveryAddress: addressSchema.required(),
+    pickupTime: Joi.string().isoDate(),
+    deliveryTime: Joi.string().isoDate(),
     pickupAddress: addressSchema,
     pickupPhone: Joi.string(),
     reference: Joi.string(),

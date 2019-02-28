@@ -49,7 +49,7 @@ class Location{
                distanceCharge = 200;
            }
 
-           const charge = Math.round(distanceCharge + basePrice);
+           const charge = Math.ceil( (distanceCharge + basePrice) / 100) *100;
 
 
 
@@ -102,7 +102,7 @@ class Location{
                 const latitude = location.lat;
                 const longitude = location.lng;
 
-                return {latitude, longitude, address_components:results[0].address_components};
+                return {latitude, longitude, address_components:response.json.results[0].address_components};
             } else {
                 throw({self: true, message: 'Cannot decode address. Please re-enter address.'});
             }

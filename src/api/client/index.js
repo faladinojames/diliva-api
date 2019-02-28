@@ -6,6 +6,7 @@ const express = require('express');
 const HttpStatus = require('http-status-codes');
 const Raven = require('raven');
 const route = express.Router();
+const http = require('https');
 const request = require('request');
 const Utilities = require('../../utilities');
 const Location = Utilities.location;
@@ -178,10 +179,30 @@ route.get('/journey_history_image/:id', async function (req, res) {
 
     const task = await Tookan.getTaskDetails(id);
 
-    if (task.job.fleet_history_image)
-        request(task.job.fleet_history_image).pipe(res);
+    // console.log(task.job);
+    if (task.job.fleet_history_image){
+        console.log('job')
+        console.log(task.job.fleet_history_image);
+        res.set('X-Frame-Options', 'ALLOW-FROM http://localhost:9528');
+
+
+        var newReq = http.request(task.job.fleet_history_image, function(newRes) {
+            var headers = newRes.headers;
+
+            headers['X-Frame-Options'] = 'ALLOW-FROM http://localhost:9528';
+
+            res.writeHead(newRes.statusCode, headers);
+            newRes.pipe(res);
+        }).on('error', function(err) {
+            res.statusCode = 500;
+            res.end();
+        });
+
+        req.pipe(newReq);
+    }
     else{
-        res.status(404).send('not found');
+        const message = task ? 'Delivery no started yet' : 'Not found';
+        res.status(404).send(message);
     }
 });
 

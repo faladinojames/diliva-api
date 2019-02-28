@@ -1,10 +1,102 @@
 const uuid = require('uuid/v4');
 const Utilities = require('../src/utilities');
 const axios = require('axios');
-
+const Location = require('../src/location');
+const Tookan = require('../src/tookan');
 const Task = require('../src/models/task');
+const MerchantWallet = require('../src/models/wallet');
+Parse.Object.registerSubclass('MerchantWallet', MerchantWallet);
 Parse.Object.registerSubclass('Task', Task);
 
+
+Parse.Cloud.define('getBanks', async (req) => {
+    return (await axios.get(`${process.env.INNSTAPAY_BASE_URL}/banks`, {
+        headers: {
+            Authorization: `Bearer ${process.env.APERE_INNSTAPAY_PRIVATE_KEY}`
+        }
+    })).data;
+});
+
+Parse.Cloud.define('resolveAccountNumber', async (req) => {
+    return (await axios.get(`${process.env.INNSTAPAY_BASE_URL}/verify/bank/?accountNo=${req.params.accountNo}&bankCode=${req.params.bankCode}`, {
+        headers: {
+            Authorization: `Bearer ${process.env.APERE_INNSTAPAY_PRIVATE_KEY}`
+        }
+    })).data.data;
+});
+
+Parse.Cloud.define('withdrawFromWallet', async (req) => {
+    const {accountNo, accountName, bankCode, amount, apiKey} = req.params;
+
+    const user = req.user;
+
+    const merchant = await Utilities.getMerchantFromApiKey(apiKey);
+
+    if (merchant.get('owner').id !== user.id){
+        Utilities.throwError('Only Owners can withdraw');
+    }
+
+
+    const wallet = await new Parse.Query('MerchantWallet').equalTo('merchant', merchant).first(masterKey);
+    const withdraw = new Parse.Object('MerchantWithdraw');
+    withdraw.set('amount', amount);
+    withdraw.set('merchant', merchant);
+    withdraw.set('accountNo', accountNo);
+    withdraw.set('accountName', accountName);
+    withdraw.set('bankCode', bankCode);
+
+    await withdraw.save(null, masterKey);
+
+
+
+
+    const job = queue.create('process_business_wallet_transaction', {
+        type: 'withdraw_from_business',
+        amount,
+        ref: withdraw.id,
+        bankCode,
+        accountNo,
+        walletId: wallet.id
+    }).save();
+
+    return "Your withdrawal is been processed"
+});
+Parse.Cloud.define('createTask', async (req) => {
+   const {from, to, deliveryDate, pickupDate} = req.params;
+
+   const metrics = await Location.getDistanceMetrics(from, to);
+
+
+
+});
+Parse.Cloud.define('estimateDelivery', async (req) => {
+    const {from, to } = req.params;
+
+    const metrics = await Location.getDistanceMetrics(from, to);
+
+    return metrics.charge;
+
+});
+Parse.Cloud.define('getTaskPayload', async (req) => {
+    const {taskId, apiKey} = req.params;
+    const merchant = await Utilities.getMerchantFromApiKey(apiKey);
+
+
+    const task = await new Parse.Query(Task).equalTo('merchant', merchant).get(taskId,masterKey);
+
+
+
+    console.log(task);
+    if(!task){
+        throw 'Job Not found'
+    }
+    const payload = await task.getPayload();
+    payload.trackingUrl = `${process.env.BASE_URL}/clients/v1/journey_history_image/${await task.getPickupId() * 399}`;
+
+    if (payload)
+        return payload
+
+});
 
 Parse.Cloud.define('updateMerchant', async (req) => {
     const {name, address, email, phone, webhook, apiKey} = req.params;
@@ -49,8 +141,11 @@ Parse.Cloud.define('creditMerchant', async (req) => {
 
             const wallet = await new Parse.Query('MerchantWallet').equalTo('merchant', merchant).first(masterKey);
 
-            const job = queue.create('update_business_balance', {
-                amount: transaction.amountWithOutCharges ,
+            console.log(transaction)
+            const job = queue.create('process_business_wallet_transaction', {
+                type: 'update_business_balance',
+                amount: transaction.amountWithoutCharges ,
+                ref,
                 id: wallet.id
             }).save();
 

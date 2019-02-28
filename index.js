@@ -53,9 +53,12 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 app.use('/webhooks', webhook);
 app.use('/merchants/v1', merchantApi);
 app.use('/clients/v1', clientsApi);
-// Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send('I so dream of being a website.');
+  res.status(200).json({
+      status: true,
+      message: 'Hi there. 😊',
+      version: '1.0'
+  });
 });
 
 
