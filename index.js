@@ -12,7 +12,7 @@ const ParseServer = require('parse-server').ParseServer;
 const path = require('path');
 
 global.masterKey =  {useMasterKey: true};
-
+const http = require('https');
 const merchantApi = require('./src/api/merchant');
 const clientsApi = require('./src/api/client');
 const webhook = require('./src/webhooks');
@@ -75,3 +75,10 @@ httpServer.listen(port, function() {
 
 // This will enable the Live Query real-time server
 ParseServer.createLiveQueryServer(httpServer);
+
+
+if(process.env.HEROKU){
+    setInterval(function() {
+        http.get(process.env.BASE_URL);
+    }, 300000); // every 5 minutes (300000)
+}

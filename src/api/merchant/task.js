@@ -30,6 +30,7 @@ route.post('/estimate', async function (req, res) {
     let deliveryLocation, pickupLocation;
 
     try{
+
         if (deliveryAddress.geocode){
             deliveryLocation = deliveryAddress.geocode;
         } else {
