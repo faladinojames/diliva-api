@@ -54,8 +54,7 @@ route.post('/estimate', async function (req, res) {
             charge
         })
     } catch(e){
-        console.error(e);
-        res.send('something went wrong')
+        ErrorHandler.handleError(e, res);
     }
 
 

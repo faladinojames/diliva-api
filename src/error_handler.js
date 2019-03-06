@@ -4,7 +4,7 @@
 const Utilities = require('./utilities')
 class ErrorHandler{
     static handleError(e, res){
-        console.log(e);
+        console.error(e);
         if (e.self){
 
             Utilities.logger.reportMessage(e.message);
