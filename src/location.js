@@ -38,6 +38,10 @@ class Location{
 
        if (response && response.json && response.json.rows.length > 0 && response.json.rows[0].elements.length > 0){
            const data = response.json.rows[0].elements[0];
+
+           if (!data.distance.value || !data.duration.value){
+               throw ({self: true, message: 'Cannot calculate distance metrics'});
+           }
            const distance =  data.distance.value/1000; //kilometres
            const duration = data.duration.value/60; //minutes
 
