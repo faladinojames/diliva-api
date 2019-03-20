@@ -106,6 +106,8 @@ class Tookan {
 
 
         if (response.status === 200){
+            const tookanTask = await this.getTaskDetails(response.data.job_id.toString());
+
             task.set('status', 1);
 
             const o = new Parse.Object('TookanTask');
@@ -114,6 +116,7 @@ class Tookan {
             o.set('pickupId', response.data.job_id.toString());
             o.set('deliveryId', response.data.delivery_job_id.toString());
             o.set('pickupTrackingUrl', response.data.pickup_tracking_link);
+            o.set('orderId', tookanTask.job.order_id);
             o.set('deliveryTrackingUrl', response.data.delivery_tracing_link || response.data.delivery_tracking_link); // in case they fix the typo
             o.set('jobHash', response.data.job_hash);
             o.set('trackingUrl', response.data.tracking_link);

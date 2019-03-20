@@ -13,8 +13,7 @@ const Task = require('./models/task');
 route.post('/tookan/:type/:event', async function (req, res) {
     const payload = req.body;
 
-    console.log('payload');
-    console.log(payload);
+    console.log('received webhook. waiting for 2 secs before processing');
 
 
     try{
@@ -24,49 +23,52 @@ route.post('/tookan/:type/:event', async function (req, res) {
             return;
         }
 
-        const id = payload.job_id;
-        console.log('data');
-        console.log(payload);
-        let tookanTask;
+        setTimeout(async () => {
+            const id = payload.job_id;
+            console.log('data');
+            console.log(payload);
+            let tookanTask;
 
-        let isPickup;
-        if (payload.job_type == 0){
-            tookanTask = await new Parse.Query('TookanTask').equalTo('pickupId', id.toString()).first(masterKey);
-            isPickup = true;
-        } else {
-            tookanTask = await new Parse.Query('TookanTask').equalTo('deliveryId', id.toString()).first(masterKey);
-        }
-
-        const task = await tookanTask.get('task');
-
-        tookanTask.set('status', payload.job_status);
-
-        if (task.get('status') !== Utilities.constants.jobStatuses.merchantCancelled) // dont override merchant's cancellation
-            switch(payload.job_status){
-                case 1:
-                    task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupInitiated : Utilities.constants.jobStatuses.deliveryInitiated);
-                    break;
-                case 2:
-                    task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupCompleted : Utilities.constants.jobStatuses.deliveryCompleted);
-                    break;
-                case 3:
-                    task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupCancelled : Utilities.constants.jobStatuses.deliveryCancelled);
-                    break;
-                case 8:
-                    task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupCancelled : Utilities.constants.jobStatuses.deliveryCancelled);
-                    break;
+            let isPickup;
+            if (payload.job_type == 0){
+                tookanTask = await new Parse.Query('TookanTask').equalTo('pickupId', id.toString()).first(masterKey);
+                isPickup = true;
+            } else {
+                tookanTask = await new Parse.Query('TookanTask').equalTo('deliveryId', id.toString()).first(masterKey);
             }
 
-        const o = new Parse.Object("TookanWebhook");
-        o.set('payload', payload);
-        o.set('type', req.params.type);
-        o.set('event', req.params.event);
+            const task = await tookanTask.get('task');
 
-        await o.save(null, masterKey);
-        await task.save(null, masterKey);
-        await tookanTask.save(null, masterKey);
+            tookanTask.set('status', payload.job_status);
 
-        res.send('ok');
+            if (task.get('status') !== Utilities.constants.jobStatuses.merchantCancelled) // dont override merchant's cancellation
+                switch(payload.job_status){
+                    case 1:
+                        task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupInitiated : Utilities.constants.jobStatuses.deliveryInitiated);
+                        break;
+                    case 2:
+                        task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupCompleted : Utilities.constants.jobStatuses.deliveryCompleted);
+                        break;
+                    case 3:
+                        task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupCancelled : Utilities.constants.jobStatuses.deliveryCancelled);
+                        break;
+                    case 8:
+                        task.set('status', isPickup ? Utilities.constants.jobStatuses.pickupCancelled : Utilities.constants.jobStatuses.deliveryCancelled);
+                        break;
+                }
+
+            const o = new Parse.Object("TookanWebhook");
+            o.set('payload', payload);
+            o.set('type', req.params.type);
+            o.set('event', req.params.event);
+
+            await o.save(null, masterKey);
+            await task.save(null, masterKey);
+            await tookanTask.save(null, masterKey);
+
+            res.send('ok');
+        }, 2000);
+
     } catch(e){
         console.error(e);
         res.status(500).send('not ok');

@@ -24,6 +24,11 @@ const ErrorHandler = require('../../error_handler');
 
 route.post('/estimate', async function (req, res) {
 
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    console.log('got estimate request from ',ip);
+    console.log(req.body);
+
     const deliveryAddress = req.body.deliveryAddress;
     const pickupAddress = req.body.pickupAddress;
 
