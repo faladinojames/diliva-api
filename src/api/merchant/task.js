@@ -26,7 +26,7 @@ route.post('/estimate', async function (req, res) {
 
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    console.log('got estimate request from ',ip);
+    console.log('got estimate request from ',ip, ' merchant: ', req.merchant.id);
     console.log(req.body);
 
     const deliveryAddress = req.body.deliveryAddress;
@@ -36,6 +36,10 @@ route.post('/estimate', async function (req, res) {
 
     try{
 
+        if(pickupAddress.state === 'LA'){
+            res.status(429).send('this kind of request has been flagged for too many request. this ip faces the risk of been blocked if the request persists');
+            return;
+        }
         if (deliveryAddress.geocode){
             deliveryLocation = deliveryAddress.geocode;
         } else {
